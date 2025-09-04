@@ -1,6 +1,7 @@
 package ar.edu.iua.iw3.model.business;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -57,34 +58,121 @@ public class ProductBusiness implements IProductBusiness {
         }
     }
 
+    /**
+     * Obtiene un producto por su identificador único.
+     *
+     * @param id Identificador del producto.
+     * @return El {@link Product} correspondiente al id proporcionado.
+     * @throws BusinessException Si ocurre un error en la lógica de negocio o en el acceso a datos.
+     * @throws NotFoundException Si no se encuentra el producto con el id especificado.
+     */
     @Override
     public Product load(Long id) throws BusinessException, NotFoundException {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'load'");
+        Optional<Product> r;
+
+        try {
+            r = productDAO.findById(id);
+        } catch(Exception e) {
+            log.error(e.getMessage(), e);
+            throw BusinessException.builder().ex(e).build();
+        }
+        if(r.isEmpty()) {
+            throw NotFoundException.builder().message("No se encuentra el producto con id: " + id).build();
+        }
+        return r.get();
     }
 
+    /**
+     * Obtiene un producto por su nombre.
+     *
+     * @param product Nombre del producto.
+     * @return El {@link Product} correspondiente al nombre proporcionado.
+     * @throws BusinessException Si ocurre un error en la lógica de negocio o en el acceso a datos.
+     * @throws NotFoundException Si no se encuentra un producto con el nombre especificado.
+     */
     @Override
     public Product load(String product) throws BusinessException, NotFoundException {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'load'");
+        Optional<Product> r;
+
+        try {
+            r = productDAO.findByProduct(product);
+        } catch(Exception e) {
+            log.error(e.getMessage(), e);
+            throw BusinessException.builder().ex(e).build();
+        }
+        if(r.isEmpty()) {
+            throw NotFoundException.builder().message("No se encuentra el producto con id: " + product).build();
+        }
+        return r.get();
     }
 
+    /**
+     * Agrega un nuevo producto.
+     * <p>
+     * Antes de agregar, verifica que no exista otro producto con el mismo id o nombre.
+     * </p>
+     *
+     * @param product Producto a agregar.
+     * @return El {@link Product} agregado.
+     * @throws BusinessException Si ocurre un error en la lógica de negocio o en el acceso a datos.
+     * @throws FoundException Si ya existe un producto con el mismo id o nombre.
+     */
     @Override
     public Product add(Product product) throws BusinessException, FoundException {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'add'");
+        try {
+            load(product.getId());
+            throw FoundException.builder().message("Se encontró el producto con id: " + product.getId()).build();
+        } catch(NotFoundException e) {
+        }
+        try {
+            load(product.getProduct());
+            throw FoundException.builder().message("Se encontró el producto con nombre: " + product.getProduct()).build();
+        } catch(NotFoundException e) {
+        }
+
+        try {
+            return productDAO.save(product);
+        } catch(Exception e) {
+            log.error(e.getMessage(), e);
+            throw BusinessException.builder().ex(e).build();
+        }
     }
 
+    /**
+     * Actualiza un producto existente.
+     *
+     * @param product Producto a actualizar.
+     * @return El {@link Product} actualizado.
+     * @throws BusinessException Si ocurre un error en la lógica de negocio o en el acceso a datos.
+     * @throws NotFoundException Si no se encuentra el producto que se desea actualizar.
+     */
     @Override
     public Product update(Product product) throws BusinessException, NotFoundException {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'update'");
+        load(product.getId());
+        try {
+            return productDAO.save(product);
+        } catch(Exception e) {
+            log.error(e.getMessage(), e);
+            throw BusinessException.builder().ex(e).build();
+        }
     }
 
+    /**
+     * Elimina un producto por su identificador.
+     *
+     * @param id Identificador del producto a eliminar.
+     * @throws BusinessException Si ocurre un error en la lógica de negocio o en el acceso a datos.
+     * @throws NotFoundException Si no se encuentra el producto con el id especificado.
+     */
     @Override
     public void delete(Long id) throws BusinessException, NotFoundException {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'delete'");
+        load(id);
+        try {
+            productDAO.deleteById(id);
+        } catch(Exception e) {
+            log.error(e.getMessage(), e);
+            throw BusinessException.builder().ex(e).build();
+        }
     }
     
 }
