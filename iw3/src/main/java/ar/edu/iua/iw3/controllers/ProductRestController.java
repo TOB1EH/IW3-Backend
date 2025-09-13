@@ -136,7 +136,8 @@ public class ProductRestController {
      * @param product Objeto {@link Product} con los datos actualizados del producto.
      * @return Un {@link ResponseEntity} con estado HTTP 200 si la actualización es exitosa,
      *         o un mensaje de error si ocurre una excepción de negocio (HTTP 500)
-     *         o si el producto no existe (HTTP 404).
+     *         o si el producto no existe (HTTP 404)
+     *         o si el producto existe (HTTP 302).
      */
     @PutMapping(value = "")
     public ResponseEntity<?> update(@RequestBody Product product) {
@@ -148,6 +149,8 @@ public class ProductRestController {
              HttpStatus.INTERNAL_SERVER_ERROR);
         } catch(NotFoundException e) {
             return new ResponseEntity<>(response.build(HttpStatus.NOT_FOUND, e, e.getMessage()), HttpStatus.NOT_FOUND);
+        } catch(FoundException e) {
+            return new ResponseEntity<>(response.build(HttpStatus.FOUND, e, e.getMessage()), HttpStatus.FOUND);
         }
     }
 

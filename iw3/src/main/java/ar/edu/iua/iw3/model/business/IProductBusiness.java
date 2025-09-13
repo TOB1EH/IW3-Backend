@@ -58,8 +58,9 @@ public interface IProductBusiness {
      * @return Producto actualizado.
      * @throws BusinessException Si ocurre un error en la lógica de negocio.
      * @throws NotFoundException Si el producto a actualizar no existe.
+     * @throws FoundException Si ya existe un producto igual en el sistema.
      */
-    public Product update(Product product) throws BusinessException, NotFoundException;
+    public Product update(Product product) throws BusinessException, NotFoundException, FoundException;
 
     /**
      * Elimina un producto del sistema a partir de su identificador.

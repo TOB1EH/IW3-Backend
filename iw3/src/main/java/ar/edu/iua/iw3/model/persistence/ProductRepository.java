@@ -31,4 +31,14 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
      * @return {@link Optional} que contiene el producto si se encuentra, o vacío si no existe.
      */
     Optional<Product> findByProduct(String product);
+
+    /**
+     * Busca un producto por su nombre, excluyendo un identificador específico.
+     * Para encontrar al producto que no tenga el mismo id que se pasa por parámetro y así poder actualizarlo correctamente.
+     *
+     * @param product Nombre o descripción del producto a buscar.
+     * @param id Identificador del producto a excluir de la búsqueda.
+     * @return {@link Optional} que contiene el producto si se encuentra, o vacío si no existe.
+     */
+    Optional<Product> findByProductAndIdNot(String product, long id);
 }

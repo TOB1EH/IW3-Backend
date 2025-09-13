@@ -140,15 +140,31 @@ public class ProductBusiness implements IProductBusiness {
 
     /**
      * Actualiza un producto existente.
+     * <p>
+     * Verifica que el producto a actualizar exista y que no haya otro producto con el mismo nombre.
+     * </p>
      *
-     * @param product Producto a actualizar.
+     * @param product Producto con los datos actualizados.
      * @return El {@link Product} actualizado.
      * @throws BusinessException Si ocurre un error en la lógica de negocio o en el acceso a datos.
-     * @throws NotFoundException Si no se encuentra el producto que se desea actualizar.
+     * @throws NotFoundException Si no se encuentra el producto a actualizar.
+     * @throws FoundException Si ya existe otro producto con el mismo nombre.
      */
     @Override
-    public Product update(Product product) throws BusinessException, NotFoundException {
+    public Product update(Product product) throws FoundException, BusinessException, NotFoundException {
         load(product.getId());
+        Optional<Product> nombreExistente = null;
+
+        try {
+            nombreExistente = productDAO.findByProductAndIdNot(product.getProduct(), product.getId());
+        } catch(Exception e) {
+            log.error(e.getMessage(), e);
+            throw BusinessException.builder().ex(e).build();
+        }
+        if(nombreExistente.isPresent()) {
+            throw FoundException.builder().message("Ya existe un producto con el nombre: " + product.getProduct()).build();
+        }
+
         try {
             return productDAO.save(product);
         } catch(Exception e) {
