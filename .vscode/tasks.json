@@ -1,0 +1,30 @@
+{
+    // See https://go.microsoft.com/fwlink/?LinkId=733558
+    // for the documentation about the tasks.json format
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "echo",
+            "type": "shell",
+            "command": "echo Hello"
+        },
+        {
+            "label": "Run mysqldev",
+            "type": "shell",
+            "command": "./mvnw spring-boot:run -Pmysqldev,jar-build -Dspring-boot.run.profiles=mysqldev -Dspring-boot.run.jvmArguments=\"-Dspring.profiles.active=mysqldev\"",
+            "options": {
+                "cwd": "${workspaceFolder}/iw3"
+            },
+            "group": "build"
+        },
+        {
+            "label": "Run mysqlprod",
+            "type": "shell",
+            "command": "./mvnw spring-boot:run -Pmysqlprod,jar-build -Dspring-boot.run.profiles=mysqlprod -Dspring-boot.run.jvmArguments=\"-Dspring.profiles.active=mysqlprod\"",
+            "options": {
+                "cwd": "${workspaceFolder}/iw3"
+            },
+            "group": "build"
+        }
+    ]
+}
