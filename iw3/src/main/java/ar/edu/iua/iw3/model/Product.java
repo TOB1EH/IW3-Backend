@@ -46,7 +46,7 @@ public class Product {
      */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private long id; // Debe ser long para que no permita valores null
 
     /**
      * Nombre o descripción del producto.

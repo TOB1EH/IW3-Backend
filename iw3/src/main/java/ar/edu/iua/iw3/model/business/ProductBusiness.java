@@ -101,7 +101,7 @@ public class ProductBusiness implements IProductBusiness {
             throw BusinessException.builder().ex(e).build();
         }
         if(r.isEmpty()) {
-            throw NotFoundException.builder().message("No se encuentra el producto con id: " + product).build();
+            throw NotFoundException.builder().message("No se encuentra el producto de nombre: " + product).build();
         }
         return r.get();
     }
