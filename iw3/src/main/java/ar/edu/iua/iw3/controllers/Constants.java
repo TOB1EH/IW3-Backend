@@ -32,4 +32,22 @@ public class Constants {
      * Construida a partir de {@link #URL_BASE} y la ruta específica "/products".
      */
     public static final String URL_PRODUCTS = URL_BASE + "/products";
+
+    /**
+    * URL del endpoint de integración.
+    * Construida a partir de {@link #URL_BASE} y la ruta específica "/integration".
+    */
+    public static final String URL_INTEGRATION = URL_BASE + "/integration";
+
+    /**
+    * URL del endpoint de integración para el cliente 1.
+    * Construida a partir de {@link #URL_INTEGRATION} y la ruta específica "/cli1".
+    */
+	public static final String URL_INTEGRATION_CLI1 = URL_INTEGRATION + "/cli1";
+
+    /**
+    * URL del endpoint de integración para el cliente 2.
+    * Construida a partir de {@link #URL_INTEGRATION} y la ruta específica "/cli2".
+    */
+	public static final String URL_INTEGRATION_CLI2 = URL_INTEGRATION + "/cli2";
 }

@@ -25,6 +25,24 @@
                 "cwd": "${workspaceFolder}/iw3"
             },
             "group": "build"
-        }
+        },
+        {
+            "label": "Run cli1",
+            "type": "shell",
+            "command": "./mvnw spring-boot:run -Pcli1,jar-build -Dspring-boot.run.profiles=cli1 -Dspring-boot.run.jvmArguments=\"-Dspring.profiles.active=cli1\"",
+            "options": {
+                "cwd": "${workspaceFolder}/iw3"
+            },
+            "group": "build"
+        },
+        {
+            "label": "Run cli2",
+            "type": "shell",
+            "command": "./mvnw spring-boot:run -Pcli2,jar-build -Dspring-boot.run.profiles=cli2 -Dspring-boot.run.jvmArguments=\"-Dspring.profiles.active=cli2\"",
+            "options": {
+                "cwd": "${workspaceFolder}/iw3"
+            },
+            "group": "build"
+        },
     ]
 }

@@ -15,9 +15,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import ar.edu.iua.iw3.model.Category;
 import ar.edu.iua.iw3.model.Product;
 import ar.edu.iua.iw3.model.business.BusinessException;
 import ar.edu.iua.iw3.model.business.FoundException;
+import ar.edu.iua.iw3.model.business.ICategoryBusiness;
 import ar.edu.iua.iw3.model.business.IProductBusiness;
 import ar.edu.iua.iw3.model.business.NotFoundException;
 
@@ -173,5 +175,124 @@ public class ProductRestController {
             return new ResponseEntity<>(response.build(HttpStatus.NOT_FOUND, e, e.getMessage()), HttpStatus.NOT_FOUND);
         }
     }
+
+    // -----------------------Categorias------------------------
+	
+    /**
+     * Componente de negocio encargado de la lógica de categorías.
+     */
+	@Autowired
+	private ICategoryBusiness categoryBusiness;
+
+    /**
+     * Obtiene la lista de todas las categorías.
+     * <p>
+     * Responde a solicitudes HTTP GET en la ruta <code>/categories</code>.
+     * </p>
+     *
+     * @return Un {@link ResponseEntity} con la lista de categorías (HTTP 200 OK),
+     *         o un mensaje de error si ocurre una excepción de negocio (HTTP 500).
+     */
+	@GetMapping(value = "/categories", produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<?> listCategories() {
+		try {
+			return new ResponseEntity<>(categoryBusiness.list(), HttpStatus.OK);
+		} catch (BusinessException e) {
+			return new ResponseEntity<>(response.build(HttpStatus.INTERNAL_SERVER_ERROR, e, e.getMessage()),
+					HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
+
+    /**
+     * Obtiene una categoría por su identificador único.
+     *
+     * @param id Identificador numérico de la categoría.
+     * @return Un {@link ResponseEntity} con la categoría encontrada (HTTP 200 OK),
+     *         o un mensaje de error si ocurre una excepción de negocio (HTTP 500)
+     *         o si la categoría no se encuentra (HTTP 404).
+     */
+	@GetMapping(value = "/categories/{id}")
+	public ResponseEntity<?> loadCategory(@PathVariable("id") long id) {
+		try {
+			return new ResponseEntity<>(categoryBusiness.load(id), HttpStatus.OK);
+		} catch (BusinessException e) {
+			return new ResponseEntity<>(response.build(HttpStatus.INTERNAL_SERVER_ERROR, e, e.getMessage()),
+					HttpStatus.INTERNAL_SERVER_ERROR);
+		} catch (NotFoundException e) {
+			return new ResponseEntity<>(response.build(HttpStatus.NOT_FOUND, e, e.getMessage()), HttpStatus.NOT_FOUND);
+		}
+	}
+
+    /**
+     * Agrega una nueva categoría.
+     * <p>
+     * Responde a solicitudes HTTP POST en la ruta <code>/categories</code>.
+     * Devuelve la ubicación del recurso creado en el encabezado HTTP 'Location'.
+     * </p>
+     *
+     * @param category Objeto {@link Category} que se desea agregar.
+     * @return Un {@link ResponseEntity} con:
+     *         - {@link HttpStatus#CREATED} si la categoría se crea correctamente,
+     *         - {@link HttpStatus#FOUND} si ya existe una categoría similar,
+     *         - {@link HttpStatus#INTERNAL_SERVER_ERROR} si ocurre un error de negocio.
+     */
+	@PostMapping(value = "/categories")
+	public ResponseEntity<?> addCategory(@RequestBody Category category) {
+		try {
+			Category response = categoryBusiness.add(category);
+			HttpHeaders responseHeaders = new HttpHeaders();
+			responseHeaders.set("location", Constants.URL_PRODUCTS + "/categories/" + response.getId());
+			return new ResponseEntity<>(responseHeaders, HttpStatus.CREATED);
+		} catch (BusinessException e) {
+			return new ResponseEntity<>(response.build(HttpStatus.INTERNAL_SERVER_ERROR, e, e.getMessage()),
+					HttpStatus.INTERNAL_SERVER_ERROR);
+		} catch (FoundException e) {
+			return new ResponseEntity<>(response.build(HttpStatus.FOUND, e, e.getMessage()), HttpStatus.FOUND);
+		}
+	}
+
+    /**
+     * Actualiza una categoría existente con los datos proporcionados.
+     *
+     * @param category Objeto {@link Category} con los datos actualizados.
+     * @return Un {@link ResponseEntity} con:
+     *         - {@link HttpStatus#OK} si la actualización es exitosa,
+     *         - {@link HttpStatus#NOT_FOUND} si la categoría no existe,
+     *         - {@link HttpStatus#INTERNAL_SERVER_ERROR} si ocurre un error de negocio.
+     */
+	@PutMapping(value = "/categories")
+	public ResponseEntity<?> updateCategory(@RequestBody Category category) {
+		try {
+			categoryBusiness.update(category);
+			return new ResponseEntity<>(HttpStatus.OK);
+		} catch (BusinessException e) {
+			return new ResponseEntity<>(response.build(HttpStatus.INTERNAL_SERVER_ERROR, e, e.getMessage()),
+					HttpStatus.INTERNAL_SERVER_ERROR);
+		} catch (NotFoundException e) {
+			return new ResponseEntity<>(response.build(HttpStatus.NOT_FOUND, e, e.getMessage()), HttpStatus.NOT_FOUND);
+		}
+	}
+
+    /**
+     * Elimina una categoría existente según su identificador.
+     *
+     * @param id Identificador numérico de la categoría a eliminar.
+     * @return Un {@link ResponseEntity} con:
+     *         - {@link HttpStatus#OK} si la eliminación es exitosa,
+     *         - {@link HttpStatus#NOT_FOUND} si la categoría no existe,
+     *         - {@link HttpStatus#INTERNAL_SERVER_ERROR} si ocurre un error de negocio.
+     */
+	@DeleteMapping(value = "/categories/{id}")
+	public ResponseEntity<?> deleteCategory(@PathVariable("id") long id) {
+		try {
+			categoryBusiness.delete(id);
+			return new ResponseEntity<String>(HttpStatus.OK);
+		} catch (BusinessException e) {
+			return new ResponseEntity<>(response.build(HttpStatus.INTERNAL_SERVER_ERROR, e, e.getMessage()),
+					HttpStatus.INTERNAL_SERVER_ERROR);
+		} catch (NotFoundException e) {
+			return new ResponseEntity<>(response.build(HttpStatus.NOT_FOUND, e, e.getMessage()), HttpStatus.NOT_FOUND);
+		}
+	}
 
 }

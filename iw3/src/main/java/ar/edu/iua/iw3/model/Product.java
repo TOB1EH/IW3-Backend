@@ -5,6 +5,10 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Inheritance;
+import jakarta.persistence.InheritanceType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -16,10 +20,23 @@ import lombok.Setter;
  * Representa un producto en el sistema.
  * <p>
  * Esta clase está mapeada a la tabla {@code products} en la base de datos y contiene
- * información sobre el nombre del producto, su disponibilidad en stock y el precio.
+ * información sobre el nombre del producto, su disponibilidad en stock, el precio
+ * y la categoría a la que pertenece.
  * </p>
  * <p>
  * Se utiliza junto con los repositorios y la capa de negocio para realizar operaciones CRUD.
+ * </p>
+ *
+ * <p>
+ * Herencia de entidades:
+ * <ul>
+ *   <li>Se utiliza la estrategia {@link InheritanceType#JOINED} mediante la anotación {@code @Inheritance}.</li>
+ *   <li>Cada subclase de {@link Product} (por ejemplo, {@link ProductCli1} y {@link ProductCli2}) 
+ *       tiene su propia tabla en la base de datos.</li>
+ *   <li>Las tablas de subclases comparten la clave primaria con la tabla {@code products}.</li>
+ *   <li>Se realizan JOINs entre la tabla base y la tabla de la subclase para recuperar los datos completos de un producto.</li>
+ * </ul>
+ * Esta estrategia permite mantener la base de datos normalizada y evita duplicación de columnas comunes.
  * </p>
  * 
  * <p>
@@ -32,6 +49,7 @@ import lombok.Setter;
  */
 @Entity
 @Table(name = "products")
+@Inheritance(strategy = InheritanceType.JOINED)
 @Getter
 @Setter
 @AllArgsConstructor
@@ -70,4 +88,15 @@ public class Product {
      * Precio del producto.
      */
     private double price;
+
+    /**
+     * Categoría a la que pertenece el producto.
+     * <p>
+     * Relación Many-to-One con la entidad {@link Category}.
+     * Puede ser {@code null} si el producto aún no está asignado a ninguna categoría.
+     * </p>
+     */
+    @ManyToOne
+    @JoinColumn(name="id_category", nullable = true)
+    private Category category;
 }

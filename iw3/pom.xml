@@ -85,6 +85,19 @@
 	<profiles>
 		<!-- Perfiles de ejecucion -->
 		<profile>
+			<id>cli1</id>
+			<properties>
+				<spring.profiles.active>cli1</spring.profiles.active>
+			</properties>
+		</profile>
+		<profile>
+			<id>cli2</id>
+			<properties>
+				<spring.profiles.active>cli2</spring.profiles.active>
+			</properties>
+		</profile>
+
+		<profile>
 			<id>mysqldev</id>
 			<!-- Cual es el perfil activo (variable que define cual es el perfil activo) -->
 			<properties>
