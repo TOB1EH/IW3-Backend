@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -13,6 +15,7 @@ import ar.edu.iua.iw3.integration.cli1.model.ProductCli1;
 import ar.edu.iua.iw3.integration.cli1.model.ProductCli1JsonDeserializer;
 import ar.edu.iua.iw3.integration.cli1.model.persistence.ProductCli1Repository;
 import ar.edu.iua.iw3.model.business.BusinessException;
+import ar.edu.iua.iw3.model.business.EmptyNameException;
 import ar.edu.iua.iw3.model.business.FoundException;
 import ar.edu.iua.iw3.model.business.ICategoryBusiness;
 import ar.edu.iua.iw3.model.business.IProductBusiness;
@@ -159,17 +162,28 @@ public class ProductCli1Business implements IProductCli1Business {
      * @throws BusinessException Si ocurre un error inesperado durante la deserialización o el guardado.
      */
 	@Override
-	public ProductCli1 addExternal(String json) throws FoundException, BusinessException {
+	public ProductCli1 addExternal(String json) throws FoundException, BusinessException, EmptyNameException {
 		ObjectMapper mapper = JsonUtiles.getObjectMapper(ProductCli1.class,
 				new ProductCli1JsonDeserializer(ProductCli1.class, categoryBusiness),null);
 		ProductCli1 product = null;
 		try {
 			product = mapper.readValue(json, ProductCli1.class);
+
+            // Se obtiene el nombre del producto del objeto JSON recibido
+			String product_name = product.getProduct();
+
+            // Si el nombre del producto viene vacío o es nulo => se lanza la excepcion creada hacia el endpoint b2b
+            if (product_name == null || product_name.isBlank()) {
+               throw EmptyNameException.builder()
+                   .message("El nombre del producto es obligatorio")
+                   .build();
+            }
 		} catch (JsonProcessingException e) {
 			log.error(e.getMessage(), e);
 			throw BusinessException.builder().ex(e).build();
-		}
+		} 
 
+        // Aqui se guarda en la base de datos el producto deserializado
 		return add(product);
 
 	}

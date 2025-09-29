@@ -4,6 +4,7 @@ import java.util.List;
 
 import ar.edu.iua.iw3.integration.cli1.model.ProductCli1;
 import ar.edu.iua.iw3.model.business.BusinessException;
+import ar.edu.iua.iw3.model.business.EmptyNameException;
 import ar.edu.iua.iw3.model.business.FoundException;
 import ar.edu.iua.iw3.model.business.NotFoundException;
 
@@ -54,6 +55,7 @@ public interface IProductCli1Business {
      * @return El producto agregado, con la información generada tras su registro.
      * @throws FoundException Si ya existe un producto con las mismas características o identificador.
      * @throws BusinessException Si ocurre un error inesperado en la capa de negocio.
+     * @throws EmptyNameException Si el nombre del producto viene vacío o es nulo, entonces se lanza esta excepcion
      */
-     public ProductCli1 addExternal(String json) throws FoundException, BusinessException;
+     public ProductCli1 addExternal(String json) throws FoundException, BusinessException, EmptyNameException;
 }

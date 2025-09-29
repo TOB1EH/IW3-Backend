@@ -19,6 +19,7 @@ import ar.edu.iua.iw3.controllers.Constants;
 import ar.edu.iua.iw3.integration.cli1.model.ProductCli1;
 import ar.edu.iua.iw3.integration.cli1.model.business.IProductCli1Business;
 import ar.edu.iua.iw3.model.business.BusinessException;
+import ar.edu.iua.iw3.model.business.EmptyNameException;
 import ar.edu.iua.iw3.model.business.FoundException;
 import ar.edu.iua.iw3.model.business.NotFoundException;
 import ar.edu.iua.iw3.util.IStandardResponseBusiness;
@@ -149,7 +150,16 @@ public class ProductCli1RestController extends BaseRestController {
 					HttpStatus.INTERNAL_SERVER_ERROR);
 		} catch (FoundException e) {
 			return new ResponseEntity<>(response.build(HttpStatus.FOUND, e, e.getMessage()), HttpStatus.FOUND);
-		}
+		} catch(EmptyNameException e) {
+			/**
+			 * Esto comunica claramente al cliente que el problema está en los datos enviados, no en el servidor.
+			 * La solicitud del cliente está mal formada
+			 * Se decidió crear una excepción personalizada para indicar explícitamente al programador cual fue el problema
+			 * que lanzó la misma. Además, se indica en la request 400 BAD REQUEST con un mensaje claro que dice:
+			 * El nombre del producto es obligatorio.
+			 */
+			return new ResponseEntity<>(response.build(HttpStatus.BAD_REQUEST, e, e.getMessage()), HttpStatus.BAD_REQUEST);
+        }
 	}
 
 }
