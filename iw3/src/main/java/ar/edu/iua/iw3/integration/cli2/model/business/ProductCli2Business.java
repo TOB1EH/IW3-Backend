@@ -24,7 +24,8 @@ public class ProductCli2Business implements IProductCli2Business {
 	/**
      * Repositorio JPA para el acceso a datos de productos de CLI2.
      */
-	@Autowired
+	// Si la clase que quiero instanciar no existe, le pongo null (con el required = false)
+	@Autowired(required = false)
 	private ProductCli2Repository productDAO;
 
 	/**

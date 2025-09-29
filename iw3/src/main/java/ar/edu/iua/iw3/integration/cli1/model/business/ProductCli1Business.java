@@ -35,7 +35,8 @@ public class ProductCli1Business implements IProductCli1Business {
     /**
      * Repositorio para el acceso a los datos de productos CLI1.
      */
-	@Autowired
+	// Si la clase que quiero instanciar no existe, le pongo null (con el required = false)
+	@Autowired(required = false)
 	private ProductCli1Repository productDAO;
 
     /**
