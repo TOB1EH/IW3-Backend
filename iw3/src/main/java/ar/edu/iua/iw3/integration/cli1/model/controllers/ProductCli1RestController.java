@@ -2,6 +2,7 @@ package ar.edu.iua.iw3.integration.cli1.model.controllers;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
+import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -108,6 +109,38 @@ public class ProductCli1RestController extends BaseRestController {
 	public ResponseEntity<?> add(@RequestBody ProductCli1 product) {
 		try {
 			ProductCli1 response = productBusiness.add(product);
+			HttpHeaders responseHeaders = new HttpHeaders();
+			responseHeaders.set("location", Constants.URL_INTEGRATION_CLI1 + "/products/" + response.getCodCli1());
+			return new ResponseEntity<>(responseHeaders, HttpStatus.CREATED);
+		} catch (BusinessException e) {
+			return new ResponseEntity<>(response.build(HttpStatus.INTERNAL_SERVER_ERROR, e, e.getMessage()),
+					HttpStatus.INTERNAL_SERVER_ERROR);
+		} catch (FoundException e) {
+			return new ResponseEntity<>(response.build(HttpStatus.FOUND, e, e.getMessage()), HttpStatus.FOUND);
+		}
+	}
+
+	/**
+     * Agrega un nuevo producto CLI1 a partir de un mensaje externo en formato JSON.
+     * <p>
+     * Responde a solicitudes HTTP POST en la ruta
+     * <code>/integration/cli1/products/b2b</code>.
+     * <br>
+     * Se utiliza principalmente para integraciones B2B, donde el cuerpo de la
+     * petición se recibe como {@link String} y se procesa internamente.
+     * </p>
+     *
+     * @param httpEntity Entidad HTTP que contiene el JSON con los datos del producto
+     *                   en su cuerpo.
+     * @return {@link ResponseEntity} con:
+     *         - {@link HttpStatus#CREATED} si se crea correctamente (incluyendo la ubicación en el header),
+     *         - {@link HttpStatus#FOUND} si ya existe un producto con el mismo código,
+     *         - {@link HttpStatus#INTERNAL_SERVER_ERROR} si ocurre un problema de negocio.
+     */
+	@PostMapping(value = "/b2b")
+	public ResponseEntity<?> addExternal(HttpEntity<String> httpEntity) {
+		try {
+			ProductCli1 response = productBusiness.addExternal(httpEntity.getBody());
 			HttpHeaders responseHeaders = new HttpHeaders();
 			responseHeaders.set("location", Constants.URL_INTEGRATION_CLI1 + "/products/" + response.getCodCli1());
 			return new ResponseEntity<>(responseHeaders, HttpStatus.CREATED);

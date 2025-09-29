@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import ar.edu.iua.iw3.integration.cli2.model.ProductCli2;
+import ar.edu.iua.iw3.integration.cli2.model.ProductCli2SlimView;
 import ar.edu.iua.iw3.integration.cli2.model.persistence.ProductCli2Repository;
 import ar.edu.iua.iw3.model.business.BusinessException;
 import lombok.extern.slf4j.Slf4j;
@@ -44,6 +45,29 @@ public class ProductCli2Business implements IProductCli2Business {
 		try {
 			return productDAO.findByExpirationDateBeforeOrderByExpirationDateDesc(date);
 		} catch (Exception e) {
+			log.error(e.getMessage(), e);
+			throw BusinessException.builder().ex(e).build();
+		}
+	}
+
+	/**
+     * Obtiene una lista simplificada de productos de CLI2,
+     * ordenados por precio de forma descendente.
+     * <p>
+     * A diferencia de {@link #listExpired(Date)}, este método
+     * no devuelve la entidad completa {@link ProductCli2}, sino
+     * una vista reducida representada por {@link ProductCli2SlimView},
+     * que incluye únicamente los atributos más relevantes.
+     * </p>
+     *
+     * @return Lista de productos en su versión reducida, ordenada por precio descendente.
+     * @throws BusinessException Si ocurre un error en la consulta o en la capa de negocio.
+     */
+	@Override
+	public List<ProductCli2SlimView> listSlim() throws BusinessException {
+		try {
+			return productDAO.findByOrderByPriceDesc();
+		} catch(Exception e) {
 			log.error(e.getMessage(), e);
 			throw BusinessException.builder().ex(e).build();
 		}

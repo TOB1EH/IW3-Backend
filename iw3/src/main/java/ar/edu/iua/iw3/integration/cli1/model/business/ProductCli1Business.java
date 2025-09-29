@@ -6,12 +6,18 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import ar.edu.iua.iw3.integration.cli1.model.ProductCli1;
+import ar.edu.iua.iw3.integration.cli1.model.ProductCli1JsonDeserializer;
 import ar.edu.iua.iw3.integration.cli1.model.persistence.ProductCli1Repository;
 import ar.edu.iua.iw3.model.business.BusinessException;
 import ar.edu.iua.iw3.model.business.FoundException;
+import ar.edu.iua.iw3.model.business.ICategoryBusiness;
 import ar.edu.iua.iw3.model.business.IProductBusiness;
 import ar.edu.iua.iw3.model.business.NotFoundException;
+import ar.edu.iua.iw3.util.JsonUtiles;
 import lombok.extern.slf4j.Slf4j;
 
 
@@ -123,6 +129,49 @@ public class ProductCli1Business implements IProductCli1Business {
 			log.error(e.getMessage(), e);
 			throw BusinessException.builder().ex(e).build();
 		}
+	}
+
+	/**
+     * Componente de negocio de categorías.
+     * <p>
+     * Se emplea durante la deserialización JSON en {@link #addExternal(String)}
+     * para asociar los productos CLI1 a sus categorías.
+     * </p>
+     */
+	@Autowired(required = false)
+	private ICategoryBusiness categoryBusiness;
+
+	/**
+     * Agrega un nuevo producto a CLI1 a partir de una representación en formato JSON.
+     * <p>
+     * Utiliza un {@link ObjectMapper} configurado con un deserializador
+     * personalizado {@link ProductCli1JsonDeserializer} para convertir
+     * la cadena JSON en un objeto {@link ProductCli1}.
+     * </p>
+     * <p>
+     * Una vez creado el objeto, reutiliza la lógica de {@link #add(ProductCli1)}
+     * para validar duplicados y registrar el producto.
+     * </p>
+     *
+     * @param json Cadena en formato JSON que representa al producto a registrar.
+     * @return El producto agregado y persistido en la base de datos.
+     * @throws FoundException    Si el producto ya existe en el sistema base o en CLI1.
+     * @throws BusinessException Si ocurre un error inesperado durante la deserialización o el guardado.
+     */
+	@Override
+	public ProductCli1 addExternal(String json) throws FoundException, BusinessException {
+		ObjectMapper mapper = JsonUtiles.getObjectMapper(ProductCli1.class,
+				new ProductCli1JsonDeserializer(ProductCli1.class, categoryBusiness),null);
+		ProductCli1 product = null;
+		try {
+			product = mapper.readValue(json, ProductCli1.class);
+		} catch (JsonProcessingException e) {
+			log.error(e.getMessage(), e);
+			throw BusinessException.builder().ex(e).build();
+		}
+
+		return add(product);
+
 	}
 
 }

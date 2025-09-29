@@ -14,11 +14,17 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ser.std.StdSerializer;
+
 import ar.edu.iua.iw3.controllers.BaseRestController;
 import ar.edu.iua.iw3.controllers.Constants;
+import ar.edu.iua.iw3.integration.cli2.model.ProductCli2;
+import ar.edu.iua.iw3.integration.cli2.model.ProductCli2SlimV1JsonSerializer;
 import ar.edu.iua.iw3.integration.cli2.model.business.IProductCli2Business;
 import ar.edu.iua.iw3.model.business.BusinessException;
 import ar.edu.iua.iw3.util.IStandardResponseBusiness;
+import ar.edu.iua.iw3.util.JsonUtiles;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -66,7 +72,8 @@ public class ProductCli2RestController extends BaseRestController {
      */
 	@GetMapping(value = "/list-expired", produces = MediaType.APPLICATION_JSON_VALUE)
 	public ResponseEntity<?> listExpired(
-			@RequestParam(name = "since", required = false, defaultValue = "1970-01-01 00:00:00") @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") Date since) {
+			@RequestParam(name = "since", required = false, defaultValue = "1970-01-01 00:00:00") @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm:ss") Date since,
+            @RequestParam(name = "slim", required = false, defaultValue = "v0") String slimVersion) {
 		try {
 			Calendar c = Calendar.getInstance();
 			c.setTime(since);
@@ -75,9 +82,22 @@ public class ProductCli2RestController extends BaseRestController {
 			if (c.get(Calendar.YEAR) == 1970) {
 				since = new Date();
 			}
+            StdSerializer<ProductCli2> ser = null;
+            // Llama a la instancia del serializador v1
+			if (slimVersion.equalsIgnoreCase("v1")) {
+                ser = new ProductCli2SlimV1JsonSerializer(ProductCli2.class, false);
+			}else {
+                // Si no se utiliza la version 1 del serializador Slim => no serializa nada
+				return new ResponseEntity<>(productBusiness.listExpired(since), HttpStatus.OK);
+			}
+            // Si el serializador v1 fue llamado => serializa el objeto a JSON para pasarle al Cliente
+			String result = JsonUtiles.getObjectMapper(ProductCli2.class, ser, null)
+					.writeValueAsString(productBusiness.listExpired(since));
+
+			
 			log.debug(since.toString());
-			return new ResponseEntity<>(productBusiness.listExpired(since), HttpStatus.OK);
-		} catch (BusinessException e) {
+			return new ResponseEntity<>(result, HttpStatus.OK);
+		} catch (BusinessException | JsonProcessingException e) {
 			return new ResponseEntity<>(response.build(HttpStatus.INTERNAL_SERVER_ERROR, e, e.getMessage()),
 					HttpStatus.INTERNAL_SERVER_ERROR);
 		}

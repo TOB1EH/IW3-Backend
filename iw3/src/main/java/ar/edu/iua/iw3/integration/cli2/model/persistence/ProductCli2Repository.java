@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import ar.edu.iua.iw3.integration.cli2.model.ProductCli2;
+import ar.edu.iua.iw3.integration.cli2.model.ProductCli2SlimView;
 
 /**
  * Repositorio JPA para el acceso a datos de productos provenientes del sistema CLI2.
@@ -29,4 +30,18 @@ public interface ProductCli2Repository extends JpaRepository<ProductCli2, Long> 
      * @return Lista de productos vencidos ordenados de forma descendente por fecha de vencimiento.
      */
 	public List<ProductCli2> findByExpirationDateBeforeOrderByExpirationDateDesc(Date expirationDate);
+
+     /**
+     * Obtiene una vista simplificada de todos los productos de CLI2,
+     * ordenados por precio de forma descendente.
+     * <p>
+     * Este método devuelve proyecciones de tipo {@link ProductCli2SlimView},
+     * que contienen solo los atributos más relevantes del producto,
+     * optimizando el acceso cuando no se necesita la entidad completa.
+     * </p>
+     *
+     * @return Lista de productos en su versión reducida {@link ProductCli2SlimView},
+     *         ordenada por precio descendente.
+     */
+     public List<ProductCli2SlimView> findByOrderByPriceDesc();
 }

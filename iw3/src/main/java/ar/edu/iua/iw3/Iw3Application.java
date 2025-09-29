@@ -1,11 +1,16 @@
 package ar.edu.iua.iw3;
 
+import java.util.Date;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
 
+import ar.edu.iua.iw3.integration.cli2.model.business.IProductCli2Business;
+import ar.edu.iua.iw3.model.persistence.ProductRepository;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -50,6 +55,18 @@ public class Iw3Application extends SpringBootServletInitializer implements Comm
 	@Value("${spring.profiles.active}")
 	private String profile;
 
+	
+	
+	/* @Autowired
+	private IProductCli2Business productCli2Business; */
+	
+	/**
+	 * Instancia del product repository para enlazar los metodos que se comunican con la base de datos
+	 */
+	@Autowired
+	private ProductRepository productDAO;
+
+
 	/**
      * Ejecuta lógica personalizada al iniciar la aplicación.
      * <p>
@@ -64,6 +81,14 @@ public class Iw3Application extends SpringBootServletInitializer implements Comm
 	@Override
 	public void run(String... args) throws Exception {
 		log.info("Perfil activo '{}'", profile);
+		/* log.info(
+			"Default --------------------------------------------------------------------------");
+		productCli2Business.listExpired(new Date());
+		log.info(
+			"Customizada ----------------------------------------------------------------------");
+		productCli2Business.listSlim(); */
+		log.info("Cantidad de productos de la categoría id=3: {}", productDAO.countProductsByCategory(3));
+		log.info("Set stock=true producto id que no existe, resultado={}", productDAO.setStock(true, 333));
 	}
 
 }

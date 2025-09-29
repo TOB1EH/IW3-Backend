@@ -46,4 +46,14 @@ public interface IProductCli1Business {
      * @throws BusinessException Si ocurre un error inesperado en la capa de negocio.
      */
 	public ProductCli1 add(ProductCli1 product) throws FoundException, BusinessException;
+
+     /**
+     * Agrega un nuevo producto al sistema CLI1 a partir de una representación externa en formato JSON.
+     *
+     * @param json Cadena en formato JSON que contiene los datos del producto a registrar.
+     * @return El producto agregado, con la información generada tras su registro.
+     * @throws FoundException Si ya existe un producto con las mismas características o identificador.
+     * @throws BusinessException Si ocurre un error inesperado en la capa de negocio.
+     */
+     public ProductCli1 addExternal(String json) throws FoundException, BusinessException;
 }
