@@ -6,10 +6,14 @@ import java.util.Date;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -19,10 +23,13 @@ import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 
 import ar.edu.iua.iw3.controllers.BaseRestController;
 import ar.edu.iua.iw3.controllers.Constants;
+import ar.edu.iua.iw3.integration.cli1.model.ProductCli1;
 import ar.edu.iua.iw3.integration.cli2.model.ProductCli2;
 import ar.edu.iua.iw3.integration.cli2.model.ProductCli2SlimV1JsonSerializer;
 import ar.edu.iua.iw3.integration.cli2.model.business.IProductCli2Business;
 import ar.edu.iua.iw3.model.business.BusinessException;
+import ar.edu.iua.iw3.model.business.EmptyNameException;
+import ar.edu.iua.iw3.model.business.FoundException;
 import ar.edu.iua.iw3.util.IStandardResponseBusiness;
 import ar.edu.iua.iw3.util.JsonUtiles;
 import lombok.extern.slf4j.Slf4j;
@@ -101,6 +108,47 @@ public class ProductCli2RestController extends BaseRestController {
 			return new ResponseEntity<>(response.build(HttpStatus.INTERNAL_SERVER_ERROR, e, e.getMessage()),
 					HttpStatus.INTERNAL_SERVER_ERROR);
 		}
+	}
+
+    /**
+     * Agrega un nuevo producto CLI1 a partir de un mensaje externo en formato JSON.
+     * <p>
+     * Responde a solicitudes HTTP POST en la ruta
+     * <code>/integration/cli1/products/b2b</code>.
+     * <br>
+     * Se utiliza principalmente para integraciones B2B, donde el cuerpo de la
+     * petición se recibe como {@link String} y se procesa internamente.
+     * </p>
+     *
+     * @param httpEntity Entidad HTTP que contiene el JSON con los datos del producto
+     *                   en su cuerpo.
+     * @return {@link ResponseEntity} con:
+     *         - {@link HttpStatus#CREATED} si se crea correctamente (incluyendo la ubicación en el header),
+     *         - {@link HttpStatus#FOUND} si ya existe un producto con el mismo código,
+     *         - {@link HttpStatus#INTERNAL_SERVER_ERROR} si ocurre un problema de negocio.
+     */
+	@PostMapping(value = "/b2b")
+	public ResponseEntity<?> addExternal(HttpEntity<String> httpEntity) {
+		try {
+			ProductCli2 response = productBusiness.addExternal(httpEntity.getBody());
+			HttpHeaders responseHeaders = new HttpHeaders();
+			responseHeaders.set("location", Constants.URL_INTEGRATION_CLI2 + "/products/" + response.getProduct());
+			return new ResponseEntity<>(responseHeaders, HttpStatus.CREATED);
+		} catch (BusinessException e) {
+			return new ResponseEntity<>(response.build(HttpStatus.INTERNAL_SERVER_ERROR, e, e.getMessage()),
+					HttpStatus.INTERNAL_SERVER_ERROR);
+		} catch (FoundException e) {
+			return new ResponseEntity<>(response.build(HttpStatus.FOUND, e, e.getMessage()), HttpStatus.FOUND);
+		} catch(EmptyNameException e) {
+			/**
+			 * Esto comunica claramente al cliente que el problema está en los datos enviados, no en el servidor.
+			 * La solicitud del cliente está mal formada
+			 * Se decidió crear una excepción personalizada para indicar explícitamente al programador cual fue el problema
+			 * que lanzó la misma. Además, se indica en la request 400 BAD REQUEST con un mensaje claro que dice:
+			 * El nombre del producto es obligatorio.
+			 */
+			return new ResponseEntity<>(response.build(HttpStatus.BAD_REQUEST, e, e.getMessage()), HttpStatus.BAD_REQUEST);
+        }
 	}
 
 }
