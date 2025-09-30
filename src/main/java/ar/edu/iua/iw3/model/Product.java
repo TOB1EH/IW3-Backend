@@ -3,9 +3,14 @@ package ar.edu.iua.iw3.model;
 // Anotaciones para la persistencia con JPA (Jakarta Persistence API)
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
+import jakarta.persistence.InheritanceType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Inheritance;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
 // Anotaciones de Lombok para generar automáticamente constructores, getters y setters
@@ -37,6 +42,7 @@ import lombok.Setter;
  */
 @Entity // Indica que esta clase es una entidad JPA (se mapea a una tabla de la BD)
 @Table(name = "products") // Especifica el nombre de la tabla en la BD
+@Inheritance(strategy = InheritanceType.JOINED)
 @AllArgsConstructor // Genera un constructor con todos los campos
 @NoArgsConstructor // Genera un constructor sin argumentos
 @Getter // Genera automáticamente los métodos getter para todos los campos
@@ -79,7 +85,11 @@ public class Product {
      * Valor numérico que representa el costo del producto. Se almacena como
      * double para permitir decimales. No tiene restricciones específicas
      * de validación en la entidad.
-     */
+     */ 
     private double precio;
+
+    @ManyToOne
+    @JoinColumn(name = "id_category", nullable = true)
+    private Category category;
 
 }
