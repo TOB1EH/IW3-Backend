@@ -13,9 +13,12 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import ar.edu.iua.iw3.model.Category;
 import ar.edu.iua.iw3.model.Product;
 import ar.edu.iua.iw3.model.business.BusinessException;
 import ar.edu.iua.iw3.model.business.FoundException;
+import ar.edu.iua.iw3.model.business.ICategoryBusiness;
 import ar.edu.iua.iw3.model.business.IProductBusiness;
 import ar.edu.iua.iw3.model.business.NotFoundException;
 import ar.edu.iua.iw3.util.IStandartResponseBusiness;
@@ -257,4 +260,163 @@ public class ProductRestController {
 			return new ResponseEntity<>(response.build(HttpStatus.NOT_FOUND, e, e.getMessage()), HttpStatus.NOT_FOUND);
 		}
 	}
+
+	/* Categorías */
+
+	/**
+	 * Servicio de negocio para operaciones relacionadas con categorías.
+	 *
+	 * Inyectado para delegar la lógica de negocio de categorías, permitiendo
+	 * operaciones CRUD sobre categorías desde este controlador.
+	 */
+	@Autowired
+	private ICategoryBusiness categoryBusiness;
+
+	/**
+	 * Endpoint para obtener la lista de todas las categorías.
+	 *
+	 * Este método maneja solicitudes GET a la ruta /api/v1/products/categories
+	 * y devuelve una lista de categorías en formato JSON.
+	 *
+	 * Propósito: Permitir a los clientes recuperar todas las categorías
+	 * disponibles en el sistema para asociar productos a categorías.
+	 *
+	 * Cómo funciona: Llama al método list() de ICategoryBusiness para obtener
+	 * la lista de categorías. Si tiene éxito, devuelve la lista con código
+	 * HTTP 200 (OK). Si ocurre BusinessException, devuelve 500 (Internal Server Error).
+	 *
+	 * Cómo usar: Enviar una solicitud GET a /api/v1/products/categories.
+	 * No requiere parámetros. Respuesta: JSON array de objetos Category.
+	 */
+	@GetMapping(value = "/categories", produces = MediaType.APPLICATION_JSON_VALUE)
+	public ResponseEntity<?> listCategories() {
+		try {
+			return new ResponseEntity<>(categoryBusiness.list(), HttpStatus.OK);
+		} catch (BusinessException e) {
+			return new ResponseEntity<>(response.build(HttpStatus.INTERNAL_SERVER_ERROR, e, e.getMessage()),
+					HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
+
+	/**
+	 * Endpoint para cargar una categoría específica por su ID.
+	 *
+	 * Este método maneja solicitudes GET a la ruta /api/v1/products/categories/{id}
+	 * y devuelve los detalles de una categoría basada en su identificador único.
+	 *
+	 * Propósito: Permitir a los clientes recuperar información detallada
+	 * de una categoría específica para operaciones de consulta individual.
+	 *
+	 * Cómo funciona: El parámetro {id} se mapea al parámetro long id del método.
+	 * Llama al método load(id) de ICategoryBusiness. Si tiene éxito, devuelve
+	 * la categoría en JSON con código HTTP 200 (OK). Si NotFoundException,
+	 * devuelve 404 (Not Found). Para BusinessException, devuelve 500.
+	 *
+	 * Cómo usar: Enviar GET a /api/v1/products/categories/{id}, reemplazando
+	 * {id} con el identificador de la categoría.
+	 */
+	@GetMapping(value = "/categories/{id}")
+	public ResponseEntity<?> loadCategory(@PathVariable("id") long id) {
+		try {
+			return new ResponseEntity<>(categoryBusiness.load(id), HttpStatus.OK);
+		} catch (BusinessException e) {
+			return new ResponseEntity<>(response.build(HttpStatus.INTERNAL_SERVER_ERROR, e, e.getMessage()),
+					HttpStatus.INTERNAL_SERVER_ERROR);
+		} catch (NotFoundException e) {
+			return new ResponseEntity<>(response.build(HttpStatus.NOT_FOUND, e, e.getMessage()), HttpStatus.NOT_FOUND);
+		}
+	}
+
+	/**
+	 * Endpoint para agregar una nueva categoría.
+	 *
+	 * Este método maneja solicitudes POST a la ruta /api/v1/products/categories
+	 * y crea una nueva categoría con la información proporcionada.
+	 *
+	 * Propósito: Permitir a los clientes crear nuevas categorías en el sistema
+	 * para organizar productos.
+	 *
+	 * Cómo funciona: Recibe un objeto Category en el cuerpo. Llama al método
+	 * add() de ICategoryBusiness. Si tiene éxito, devuelve cabecera 'location'
+	 * con la URL de la nueva categoría y código HTTP 201 (Created). Si FoundException,
+	 * devuelve 302 (Found). Para BusinessException, devuelve 500.
+	 *
+	 * Cómo usar: Enviar POST a /api/v1/products/categories con JSON de la
+	 * nueva categoría en el cuerpo.
+	 */
+	@PostMapping(value = "/categories")
+	public ResponseEntity<?> addCategory(@RequestBody Category category) {
+		try {
+			Category response = categoryBusiness.add(category);
+			HttpHeaders responseHeaders = new HttpHeaders();
+			responseHeaders.set("location", Constants.URL_PRODUCTS + "/categories/" + response.getId());
+			return new ResponseEntity<>(responseHeaders, HttpStatus.CREATED);
+		} catch (BusinessException e) {
+			return new ResponseEntity<>(response.build(HttpStatus.INTERNAL_SERVER_ERROR, e, e.getMessage()),
+					HttpStatus.INTERNAL_SERVER_ERROR);
+		} catch (FoundException e) {
+			return new ResponseEntity<>(response.build(HttpStatus.FOUND, e, e.getMessage()), HttpStatus.FOUND);
+		}
+	}
+
+	/**
+	 * Endpoint para actualizar una categoría existente.
+	 *
+	 * Este método maneja solicitudes PUT a la ruta /api/v1/products/categories
+	 * y actualiza los datos de una categoría existente.
+	 *
+	 * Propósito: Permitir a los clientes modificar categorías existentes,
+	 * manteniendo el ID de la categoría.
+	 *
+	 * Cómo funciona: Recibe un objeto Category con ID existente y datos
+	 * actualizados. Llama al método update() de ICategoryBusiness. Si tiene
+	 * éxito, devuelve código HTTP 200 (OK). Si NotFoundException, devuelve 404.
+	 * Para BusinessException, devuelve 500.
+	 *
+	 * Cómo usar: Enviar PUT a /api/v1/products/categories con JSON de la
+	 * categoría actualizada en el cuerpo. Debe incluir el ID existente.
+	 */
+	@PutMapping(value = "/categories")
+	public ResponseEntity<?> updateCategory(@RequestBody Category category) {
+		try {
+			categoryBusiness.update(category);
+			return new ResponseEntity<>(HttpStatus.OK);
+		} catch (BusinessException e) {
+			return new ResponseEntity<>(response.build(HttpStatus.INTERNAL_SERVER_ERROR, e, e.getMessage()),
+					HttpStatus.INTERNAL_SERVER_ERROR);
+		} catch (NotFoundException e) {
+			return new ResponseEntity<>(response.build(HttpStatus.NOT_FOUND, e, e.getMessage()), HttpStatus.NOT_FOUND);
+		}
+	}
+
+	/**
+	 * Endpoint para eliminar una categoría por su ID.
+	 *
+	 * Este método maneja solicitudes DELETE a la ruta /api/v1/products/categories/{id}
+	 * y elimina la categoría correspondiente del sistema.
+	 *
+	 * Propósito: Permitir a los clientes remover categorías del sistema
+	 * de manera permanente.
+	 *
+	 * Cómo funciona: Recibe el ID de la categoría como parámetro de ruta.
+	 * Llama al método delete() de ICategoryBusiness. Si tiene éxito, devuelve
+	 * código HTTP 200 (OK). Si NotFoundException, devuelve 404. Para BusinessException,
+	 * devuelve 500.
+	 *
+	 * Cómo usar: Enviar DELETE a /api/v1/products/categories/{id}, donde
+	 * {id} es el identificador único de la categoría a eliminar.
+	 */
+	@DeleteMapping(value = "/categories/{id}")
+	public ResponseEntity<?> deleteCategory(@PathVariable("id") long id) {
+		try {
+			categoryBusiness.delete(id);
+			return new ResponseEntity<String>(HttpStatus.OK);
+		} catch (BusinessException e) {
+			return new ResponseEntity<>(response.build(HttpStatus.INTERNAL_SERVER_ERROR, e, e.getMessage()),
+					HttpStatus.INTERNAL_SERVER_ERROR);
+		} catch (NotFoundException e) {
+			return new ResponseEntity<>(response.build(HttpStatus.NOT_FOUND, e, e.getMessage()), HttpStatus.NOT_FOUND);
+		}
+	}
+
 }
