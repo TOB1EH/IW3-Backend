@@ -4,6 +4,8 @@ import java.util.Date;
 import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import ar.edu.iua.iw3.integration.cli2.model.ProductCli2;
@@ -44,4 +46,14 @@ public interface ProductCli2Repository extends JpaRepository<ProductCli2, Long> 
      *         ordenada por precio descendente.
      */
      public List<ProductCli2SlimView> findByOrderByPriceDesc();
+
+     /**
+     * Obtiene todos los productos dependiendo un rango de precios de inicio y fin.
+     *
+     * @param startPrice Precio de inicio del rango a buscar
+     * @param endPrice Precio de fin del rango a buscar
+     * @return Lista de productos del Cliente 2
+     */
+     @Query("SELECT p FROM ProductCli2 p WHERE p.price >= :startPrice AND (:endPrice IS NULL OR p.price <= :endPrice) ORDER BY p.price ASC")
+     public List<ProductCli2> getProductsByPrice(Double startPrice, Double endPrice);
 }

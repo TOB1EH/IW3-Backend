@@ -9,6 +9,7 @@ import ar.edu.iua.iw3.integration.cli2.model.ProductCli2;
 import ar.edu.iua.iw3.integration.cli2.model.ProductCli2SlimView;
 import ar.edu.iua.iw3.integration.cli2.model.persistence.ProductCli2Repository;
 import ar.edu.iua.iw3.model.business.BusinessException;
+import ar.edu.iua.iw3.model.business.NotFoundException;
 import lombok.extern.slf4j.Slf4j;
 
 /**
@@ -72,5 +73,30 @@ public class ProductCli2Business implements IProductCli2Business {
 			throw BusinessException.builder().ex(e).build();
 		}
 	}
+
+     /**
+     * Obtiene una lista de productos de CLI2 cuyo precio se encuentra dentro
+     * de un rango específico.
+     * <p>
+     * Este método permite filtrar los productos según su valor monetario,
+     * considerando únicamente aquellos cuyo precio sea mayor o igual al
+     * valor mínimo establecido ({@code startPrice}) y menor o igual al
+     * valor máximo establecido ({@code endPrice}).
+     * </p>
+     *
+     * @param startPrice Precio mínimo del rango (inclusive).
+     * @param endPrice   Precio máximo del rango (inclusive).
+     * @return Lista de productos {@link ProductCli2} cuyo precio se encuentra
+     *         dentro del rango especificado.
+     * @throws BusinessException Si ocurre un error en la consulta o en la capa de negocio.
+     */
+     public List<ProductCli2> listByPrice(Double startPrice, Double endPrice) throws BusinessException {
+          try {
+               return productDAO.getProductsByPrice(startPrice, endPrice);
+          } catch(Exception e) {
+               log.error(e.getMessage(), e);
+			throw BusinessException.builder().ex(e).build();
+          }
+     }
 
 }

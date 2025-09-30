@@ -103,4 +103,34 @@ public class ProductCli2RestController extends BaseRestController {
 		}
 	}
 
+    /**
+     * Obtiene la lista de productos de CLI2 cuyo precio se encuentra dentro de un rango dado.
+     * <p>
+     * El rango se define mediante los parámetros {@code start-price} y {@code end-price}.
+     * Si no se especifica {@code start-price}, se asume el valor 0 como mínimo.
+     * El parámetro {@code end-price} es opcional, y si no se envía, se considerarán
+     * todos los productos con precio mayor o igual a {@code start-price}.
+     * </p>
+     *
+     * <p><b>Ejemplo de uso:</b></p>
+     * {@code GET http://localhost:8080/api/v1/integration/cli2/products/list-by-price?start-price=100&end-price=500}
+     *
+     * @param startPrice Precio mínimo del rango (inclusive). Si no se indica, toma el valor {@code 0}.
+     * @param endPrice   Precio máximo del rango (inclusive). Si no se indica, se consideran todos los productos por encima de {@code startPrice}.
+     * @return Un {@link ResponseEntity} con la lista de productos dentro del rango de precios (HTTP 200 OK),
+     *         o un error interno (HTTP 500) si ocurre una {@link BusinessException}.
+     */
+    @GetMapping(value = "/list-by-price", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<?> listByPrice(
+        @RequestParam(name = "start-price", required = false, defaultValue = "0") Double startPrice,
+        @RequestParam(name = "end-price", required = false) Double endPrice) {
+            try {
+                return new ResponseEntity<>(productBusiness.listByPrice(startPrice, endPrice), HttpStatus.OK);
+            } catch(BusinessException e) {
+                return new ResponseEntity<>(response.build(HttpStatus.INTERNAL_SERVER_ERROR, e, e.getMessage()),
+					HttpStatus.INTERNAL_SERVER_ERROR);
+            }
+        }
+    
+
 }

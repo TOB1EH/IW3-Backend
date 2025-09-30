@@ -40,4 +40,20 @@ public interface IProductCli2Business {
      * @throws BusinessException Si ocurre un error en la capa de negocio o en el acceso a datos.
      */
      public List<ProductCli2SlimView> listSlim() throws BusinessException;
+
+     /**
+     * Obtiene una lista de productos de CLI2 cuyo precio se encuentra dentro
+     * de un rango específico.
+     * <p>
+     * Este método filtra los productos considerando únicamente aquellos cuyo
+     * precio sea mayor o igual a {@code startPrice} y menor o igual a {@code endPrice}.
+     * </p>
+     *
+     * @param startPrice Precio mínimo del rango (inclusive).
+     * @param endPrice   Precio máximo del rango (inclusive).
+     * @return Lista de productos {@link ProductCli2} cuyo precio se encuentra dentro del rango.
+     *         Si no existen productos que cumplan la condición, se devolverá una lista vacía.
+     * @throws BusinessException Si ocurre un error en la capa de negocio o en el acceso a datos.
+     */
+     public List<ProductCli2> listByPrice(Double startPrice, Double endPrice) throws BusinessException;
 }
