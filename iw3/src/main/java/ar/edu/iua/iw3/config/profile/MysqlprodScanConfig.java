@@ -30,20 +30,20 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
  *
  */
 @Configuration
-@EnableJpaRepositories(basePackages = "ar.edu.iua.iw3")
-/* excludeFilters = {
+@EnableJpaRepositories(basePackages = "ar.edu.iua.iw3",
+excludeFilters = {
 		@ComponentScan.Filter(type = FilterType.REGEX, pattern = "ar\\.edu\\.iua\\.iw3\\.integration\\.cli1\\..*" ),
 		@ComponentScan.Filter(type = FilterType.REGEX, pattern = "ar\\.edu\\.iua\\.iw3\\.integration\\.cli2\\..*" )
-}) */
+}) 
 
 
 //Entidades
 @EntityScan(basePackages = { 
 		"ar.edu.iua.iw3.model", 
-		"ar.edu.iua.iw3.auth",
-        "ar.edu.iua.iw3.integration.cli1.model",
-        "ar.edu.iua.iw3.integration.cli2.model"
+		"ar.edu.iua.iw3.auth"
 })
+/* "ar.edu.iua.iw3.integration.cli1.model",
+"ar.edu.iua.iw3.integration.cli2.model" */
 
 @Profile("mysqlprod")
 public class MysqlprodScanConfig {

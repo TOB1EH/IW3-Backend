@@ -50,4 +50,6 @@ public class Constants {
     * Construida a partir de {@link #URL_INTEGRATION} y la ruta específica "/cli2".
     */
 	public static final String URL_INTEGRATION_CLI2 = URL_INTEGRATION + "/cli2";
+
+    public static final String URL_LOGIN = URL_BASE + "/login";
 }
